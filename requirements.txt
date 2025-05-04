@@ -1,5 +1,7 @@
-nltk 
+nltk==3.8.1
+cython==3.0.12
 Flask==2.3.2
 pytest
 rake_nltk
 spacy
+numpy>=1.24,<2.0
