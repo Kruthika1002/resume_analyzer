@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analysis Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Resume Analysis Results</h1>
+            <a href="/" class="back-link">← Upload a different resume</a>
+        </header>
+
+        <main class="results-page">
+            <div class="score-summary">
+                <div class="score-card">
+                    <h2>Overall Match</h2>
+                    {% if results.job_match %}
+                    <div class="score-indicator {{ 'low' if results.job_match.overall_match < 50 else 'medium' if results.job_match.overall_match < 70 else 'high' }}">
+                        {{ results.job_match.overall_match }}%
+                    </div>
+                    {% else %}
+                    <div class="score-indicator medium">N/A</div>
+                    <p>No job description provided</p>
+                    {% endif %}
+                </div>
+                
+                {% if results.job_match %}
+                <div class="score-card">
+                    <h2>Keyword Match</h2>
+                    <div class="score-indicator {{ 'low' if results.job_match.keyword_match_percentage < 50 else 'medium' if results.job_match.keyword_match_percentage < 70 else 'high' }}">
+                        {{ results.job_match.keyword_match_percentage }}%
+                    </div>
+                </div>
+                
+                <div class="score-card">
+                    <h2>Skills Match</h2>
+                    <div class="score-indicator {{ 'low' if results.job_match.skill_match_percentage < 50 else 'medium' if results.job_match.skill_match_percentage < 70 else 'high' }}">
+                        {{ results.job_match.skill_match_percentage }}%
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <section class="analysis-section">
+                <h2>Key Recommendations</h2>
+                <div class="recommendations">
+                    {% if results.job_match and results.job_match.recommendations %}
+                        <h3>Job Match Recommendations</h3>
+                        <ul>
+                            {% for recommendation in results.job_match.recommendations %}
+                                <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if results.completeness.general_recommendations %}
+                        <h3>Resume Completeness</h3>
+                        <ul>
+                            {% for recommendation in results.completeness.general_recommendations %}
+                                <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if results.sections.missing_essential %}
+                        <h3>Missing Essential Sections</h3>
+                        <ul class="missing-sections">
+                            {% for section in results.sections.missing_essential %}
+                                <li>
+                                    <strong>{{ section.section|title }}</strong>: {{ section.description }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </section>
+
+            {% if results.sections.section_quality %}
+            <section class="analysis-section">
+                <h2>Section-by-Section Analysis</h2>
+                <div class="section-analysis">
+                    {% for section_name, quality in results.sections.section_quality.items() %}
+                        <div class="section-card">
+                            <h3>{{ section_name|title }}</h3>
+                            {% if quality.recommendations %}
+                                <ul>
+                                    {% for recommendation in quality.recommendations %}
+                                        <li>{{ recommendation }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="good-section">This section looks good!</p>
+                            {% endif %}
+
+                            {% if section_name == 'skills' and quality.identified_skills %}
+                                <div class="skills-list">
+                                    <h4>Identified Skills:</h4>
+                                    <div class="skill-tags">
+                                        {% for skill in quality.identified_skills %}
+                                            <span class="skill-tag">{{ skill }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            
+            {% if results.job_match %}
+            <section class="analysis-section">
+                <h2>Job Match Details</h2>
+                
+                {% if results.job_match.matching_skills %}
+                <div class="match-details">
+                    <h3>Matching Skills</h3>
+                    <div class="skill-tags">
+                        {% for skill in results.job_match.matching_skills %}
+                            <span class="skill-tag match">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if results.job_match.missing_skills %}
+                <div class="match-details">
+                    <h3>Missing Skills</h3>
+                    <div class="skill-tags">
+                        {% for skill in results.job_match.missing_skills %}
+                            <span class="skill-tag missing">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if results.job_match.missing_terms %}
+                <div class="match-details">
+                    <h3>Important Terms to Add</h3>
+                    <div class="missing-terms">
+                        <ul>
+                            {% for term in results.job_match.missing_terms %}
+                                <li><strong>{{ term.term }}</strong> (mentioned {{ term.frequency }} times)</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            {% if results.sections.missing_additional %}
+            <section class="analysis-section">
+                <h2>Suggested Additional Sections</h2>
+                <div class="suggested-sections">
+                    <ul>
+                        {% for section in results.sections.missing_additional %}
+                            <li>
+                                <strong>{{ section.section|title }}</strong>: {{ section.description }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>Resume Analyzer - A tool for fresh graduates to improve their job applications</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

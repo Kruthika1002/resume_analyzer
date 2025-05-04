@@ -1,0 +1,21 @@
+{
+    "sections": {
+      "summary": 10,
+      "experience": 30,
+      "skills": 25,
+      "education": 20,
+      "projects": 10,
+      "certifications": 5
+    },
+    "keywords": {
+      "hard_skills": ["Python", "Machine Learning", "Flask", "SQL", "API Development"],
+      "soft_skills": ["Communication", "Problem-solving", "Leadership"],
+      "action_verbs": ["developed", "implemented", "analyzed", "managed", "optimized"]
+    },
+    "ats_rules": {
+      "file_format": ["docx", "pdf"],
+      "section_order": ["summary", "experience", "skills", "education", "projects", "certifications"],
+      "bullet_points": true
+    }
+  }
+  

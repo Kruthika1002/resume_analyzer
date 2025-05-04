@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Resume Evaluator</h1>
+            <p>Upload your resume and get personalized feedback to improve your job applications</p>
+        </header>
+
+        <main>
+            <form action="/upload" method="post" enctype="multipart/form-data" class="upload-form" id="resumeForm">
+                <div class="form-group">
+                    <label for="resume">Upload Your Resume (PDF or DOCX):</label>
+                    <div class="file-drop-area" id="dropArea">
+                        <span class="file-message">Drag & drop your resume here or click to browse</span>
+                        <input type="file" id="resume" name="resume" accept=".pdf,.docx,.doc" class="file-input" required>
+                    </div>
+                    <div class="file-preview" id="filePreview"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="job_description">Paste Job Description:</label>
+                    <textarea id="job_description" name="job_description" rows="10" placeholder="Paste the job description here to get tailored recommendations..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Analyze Resume</button>
+            </form>
+
+            <div class="features">
+                <h2>Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <h3>Resume Analysis</h3>
+                        <p>Get detailed insights on your resume's strengths and weaknesses</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Keyword Extraction</h3>
+                        <p>Identify the most important keywords in your resume</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Job Matching</h3>
+                        <p>See how well your resume matches a specific job description</p>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📈</div>
+                        <h3>Improvement Tips</h3>
+                        <p>Receive personalized recommendations to enhance your resume</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📝</div>
+                        <h3>Format Analysis</h3>
+                        <p>Check if your resume follows best formatting practices</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="how-it-works">
+                <h2>How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Upload Your Resume</h3>
+                            <p>Upload your resume in PDF, DOCX, or TXT format</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Add Job Description</h3>
+                            <p>Paste a job description for better matching .</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Get Comprehensive Analysis</h3>
+                            <p>Receive detailed feedback and actionable improvements</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Resume Analyzer for fresh graduates | All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('resume');
+            const filePreview = document.getElementById('filePreview');
+            const resumeForm = document.getElementById('resumeForm');
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            // Remove highlight when item is dragged out or dropped
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            // Handle dropped files
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            // Handle clicked upload
+            fileInput.addEventListener('change', handleFiles, false);
+
+            // For clicking on the drop area - make sure fileInput doesn't handle its own click
+            fileInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Handle click on drop area - this is the only place we should trigger the file input
+            dropArea.addEventListener('click', function(e) {
+                // Only open file dialog if we're clicking on the drop area itself, not on a child element
+                if (e.target === dropArea || e.target.classList.contains('file-message')) {
+                    fileInput.click();
+                }
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight() {
+                dropArea.classList.add('highlight');
+            }
+
+            function unhighlight() {
+                dropArea.classList.remove('highlight');
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length) {
+                    // Set the file to the input
+                    fileInput.files = files;
+                    
+                    // Update file preview
+                    updateFilePreview(files[0]);
+                    
+                    // Explicitly trigger input validation
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                    
+                    // Mark field as valid - explicitly set validity
+                    fileInput.setCustomValidity('');
+                }
+            }
+
+            function handleFiles() {
+                const files = fileInput.files;
+                if (files.length) {
+                    updateFilePreview(files[0]);
+                    // Ensure field is marked as valid
+                    fileInput.setCustomValidity('');
+                }
+            }
+
+            function updateFilePreview(file) {
+                filePreview.innerHTML = '';
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                // Get file extension
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                
+                // Set icon based on file type
+                let fileIcon;
+                if (fileExtension === 'pdf') {
+                    fileIcon = 'PDF';
+                } else if (['doc', 'docx'].includes(fileExtension)) {
+                    fileIcon = 'DOC';
+                } else {
+                    fileIcon = 'File';
+                }
+                
+                fileInfo.innerHTML = `
+                    <div class="file-icon">${fileIcon}</div>
+                    <div class="file-details">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button type="button" class="remove-file" title="Remove file">×</button>
+                `;
+                
+                filePreview.appendChild(fileInfo);
+                
+                // Add remove functionality
+                const removeButton = filePreview.querySelector('.remove-file');
+                removeButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent click from propagating to drop area
+                    fileInput.value = '';
+                    filePreview.innerHTML = '';
+                    
+                    // Show the file message again
+                    dropArea.querySelector('.file-message').style.display = 'block';
+                    
+                    // Mark field as invalid since file was removed
+                    fileInput.setCustomValidity('Please upload a resume file');
+                });
+                
+                // Make sure the drop area message is hidden
+                dropArea.querySelector('.file-message').style.display = 'none';
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Add form submission handler to perform final validation
+            resumeForm.addEventListener('submit', function(e) {
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    e.preventDefault();
+                    fileInput.setCustomValidity('Please upload a resume file');
+                    fileInput.reportValidity();
+                } else {
+                    fileInput.setCustomValidity('');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
